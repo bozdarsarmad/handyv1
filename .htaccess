@@ -1,0 +1,31 @@
+Options -Indexes
+RewriteEngine On
+
+# Redirect all non-file requests to index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(?!api/|admin/)(.*)$ index.php [L,QSA]
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Protect uploads from PHP execution
+<FilesMatch "\.(php|php3|php4|php5|phtml)$">
+    <IfModule mod_rewrite.c>
+        RewriteCond %{REQUEST_URI} ^/uploads/
+        RewriteRule .* - [F,L]
+    </IfModule>
+</FilesMatch>
+
+# CORS for API
+<IfModule mod_headers.c>
+    <FilesMatch "\.(php)$">
+        Header set Access-Control-Allow-Origin "*"
+        Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+        Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+    </FilesMatch>
+</IfModule>
